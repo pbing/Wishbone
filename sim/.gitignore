@@ -1,6 +1,18 @@
 # Modelsim files
 *.do
-*.mti
 *.mpf
+*.mti
 *.wlf
 work/
+
+# VCS files
+*.do
+*.tcl
+*.vpd
+DVEfiles/
+clean.sh
+csrc/
+simv
+simv.daidir/
+ucli.key
+vcs.args
