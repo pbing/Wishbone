@@ -3,9 +3,12 @@
 `default_nettype none
 
 module wb_slave_standard(if_wb.slave wb);
-   wire valid;
-   wire ram_cen;
-   wire ram_wen;
+   parameter waitcycles = 0;
+
+   wire                 valid;
+   logic                ram_cen;
+   wire                 ram_wen;
+   logic [0:waitcycles] ack;
 
    /* Single port RAM */
    ram64kx16 ram(.clk (wb.clk),
@@ -15,20 +18,30 @@ module wb_slave_standard(if_wb.slave wb);
                  .cen (ram_cen),
                  .wen (ram_wen));
 
-   assign ram_cen = valid & ~wb.ack;
+   always_comb
+     if (waitcycles == 0)
+       ram_cen = valid & ~wb.ack;
+     else
+       ram_cen = valid & ack[$right(ack) - 1] & ~ack[$right(ack)];
+
    assign ram_wen = ram_cen & wb.we;
 
    /* Wishbone control */
-   assign valid   = wb.cyc & wb.stb;
+   assign valid = wb.cyc & wb.stb;
 
    always_ff @(posedge wb.clk)
      if (wb.rst)
-       wb.ack <= 1'b0;
+       ack <= '0;
      else
-       wb.ack <= valid & ~wb.ack;
-   //       wb.ack <= valid && !wb.ack && ({$random} % 3 != 0);
+       if (!wb.ack)
+         if (waitcycles == 0)
+           ack <= valid;
+         else
+           ack <= {valid, ack[$left(ack):$right(ack) - 1]};
+       else
+         ack <= '0;
 
-   assign wb.stall = 1'b0;
+   assign wb.ack = ack[$right(ack)];
 endmodule
 
 `resetall

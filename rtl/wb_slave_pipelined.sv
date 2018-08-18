@@ -3,9 +3,12 @@
 `default_nettype none
 
 module wb_slave_pipelined(if_wb.slave wb);
-   wire valid;
-   wire ram_cen;
-   wire ram_wen;
+   parameter waitcycles = 0;
+
+   wire                 valid;
+   logic                ram_cen;
+   wire                 ram_wen;
+   logic [1:waitcycles] stall;   // optimized away when no waitcycles
 
    /* Single port RAM */
    ram64kx16 ram(.clk (wb.clk),
@@ -15,7 +18,12 @@ module wb_slave_pipelined(if_wb.slave wb);
                  .cen (ram_cen),
                  .wen (ram_wen));
 
-   assign ram_cen = valid;
+   always_comb
+     if (waitcycles == 0)
+       ram_cen = valid & ~wb.stall;
+     else
+       ram_cen = valid & ~stall[$right(stall)];
+
    assign ram_wen = ram_cen & wb.we;
 
    /* Wishbone control */
@@ -29,10 +37,22 @@ module wb_slave_pipelined(if_wb.slave wb);
 
    always_ff @(posedge wb.clk)
      if (wb.rst)
-       wb.stall <= 1'b0;
+       stall <= '1;
      else
-       wb.stall <= 1'b0;
-   //       wb.stall <= ({$random} % 3 == 0);
+       if (stall == '0)
+         stall <= '1;
+       else
+         if (valid)
+           if (waitcycles == 1)
+             stall <= '0;
+           else
+             stall <= {1'b0, stall[$left(stall):$right(stall) - 1]};
+
+   always_comb
+     if (waitcycles == 0)
+       wb.stall = 1'b0;
+     else
+       wb.stall = valid & stall[$right(stall)];
 endmodule
 
 `resetall

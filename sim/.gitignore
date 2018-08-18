@@ -1,6 +1,7 @@
 # Modelsim files
 *.do
-*.mti
 *.mpf
+*.mti
+*.vstf
 *.wlf
 work/

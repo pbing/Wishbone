@@ -6,15 +6,15 @@ module tb4;
    timeunit 1ns;
    timeprecision 1ps;
 
-   parameter adr_width = 16;
-   parameter dat_width = 16;
+   parameter adr_width  = 16;
+   parameter dat_width  = 16;
 
-   const realtime tclk  = 1s / 100.0e6;
+   const realtime tclk = 1s / 100.0e6;
 
-   bit                      rst = 1'b1;
-   bit                      clk;
+   bit rst = 1'b1;
+   bit clk;
 
-   `include "tasks.svh"
+`include "tasks.svh"
 
    if_wb wb(.*);
 
@@ -27,7 +27,7 @@ module tb4;
         $timeformat(-9, 3, " ns");
 
         wb.adr   = '0;
-        wb.dat_m = 'z;
+        wb.dat_m = $random;
         wb.we    = 1'b0;
         wb.cyc   = 1'b0;
         wb.stb   = 1'b0;
