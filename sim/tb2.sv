@@ -14,7 +14,7 @@ module tb2;
    bit                      rst = 1'b1;
    bit                      clk;
 
-   `include "tasks.svh"
+`include "tasks.svh"
 
    if_wb wb(.*);
 
@@ -55,6 +55,7 @@ module tb2;
         for (int i = 11; i <= 20; i++)
           write_single_pipelined1(i, 200 + i);
 
+        wb.stb <= 1'b0;
         @(posedge clk);
         wb.cyc <= 1'b0;
 
@@ -62,7 +63,8 @@ module tb2;
 
         for (int i = 11; i <= 20; i++)
           read_single_pipelined1(i);
-  
+        
+        wb.stb <= 1'b0;
         @(posedge clk);
         wb.cyc <= 1'b0;
 

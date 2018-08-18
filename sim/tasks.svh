@@ -27,8 +27,6 @@ task write_single_pipelined1
    wb.stb   <= 1'b1;
 
    do @(posedge clk); while(wb.stall);
-   
-   wb.stb   <= 1'b0;
 endtask
 
 task write_single_pipelined
@@ -37,6 +35,7 @@ task write_single_pipelined
 
    write_single_pipelined1(a, d);
 
+   wb.stb <= 1'b0;
    @(posedge clk);
    wb.cyc <= 1'b0;
 endtask
@@ -64,15 +63,14 @@ task read_single_pipelined1
    wb.stb <= 1'b1;
 
    do @(posedge clk); while(wb.stall);
-   
-   wb.stb <= 1'b0;
 endtask
 
 task read_single_pipelined
   (input [dat_width - 1 : 0] a);
 
    read_single_pipelined1(a);
-
+   
+   wb.stb <= 1'b0;
    @(posedge clk);
    wb.cyc <= 1'b0;
 endtask
