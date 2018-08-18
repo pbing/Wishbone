@@ -1,8 +1,14 @@
-/* Classic pipelined bus cycle Wishbone interface */
+/* Classic pipelined bus cycle Wishbone
+ *
+ * These modport expressions do not work with Design Compiler:
+ *
+ * modport master (.dat_i(dat_s), .dat_o(dat_m), ...);
+ * modport slave  (.dat_i(dat_m), .dat_o(dat_s), ...);
+ */
 
 interface if_wb
-   (input wire rst,
-    input wire clk);
+  (input wire rst,
+   input wire clk);
 
    parameter adr_width = 16;
    parameter dat_width = 16;
@@ -13,38 +19,42 @@ interface if_wb
    logic                     stall;
    logic                     stb;
    logic                     we;
-   logic [dat_width - 1 : 0] dat_i, dat_o;
+   logic [dat_width - 1 : 0] dat_m; // channel from master
+   logic [dat_width - 1 : 0] dat_s; // channel from slave
 
-   modport master(input  clk,
-                  input  rst,
-                  input  ack,
-                  output adr,
-                  output cyc,
-                  input  stall,
-                  output stb,
-                  output we,
-                  input  dat_i,
-                  output dat_o);
+   modport master
+     (input  clk,
+      input  rst,
+      input  ack,
+      output adr,
+      output cyc,
+      input  stall,
+      output stb,
+      output we,
+`ifdef NO_MODPORT_EXPRESSIONS
+      input  dat_s,
+      output dat_m
+`else
+      input  .dat_i(dat_s),
+      output .dat_o(dat_m)
+`endif
+      );
 
-   modport slave(input  clk,
-                 input  rst,
-                 output ack,
-                 input  adr,
-                 input  cyc,
-                 output stall,
-                 input  stb,
-                 input  we,
-                 input  dat_i,
-                 output dat_o);
-
-   modport monitor(input  clk,
-                   input  rst,
-                   input  ack,
-                   input  adr,
-                   input  cyc,
-                   input  stall,
-                   input  stb,
-                   input  we,
-                   input  dat_i,
-                   input  dat_o);
+   modport slave
+     (input  clk,
+      input  rst,
+      output ack,
+      input  adr,
+      input  cyc,
+      output stall,
+      input  stb,
+      input  we,
+`ifdef NO_MODPORT_EXPRESSIONS
+      input  dat_m,
+      output dat_s
+`else
+      input  .dat_i(dat_m),
+      output .dat_o(dat_s)
+`endif
+      );
 endinterface: if_wb

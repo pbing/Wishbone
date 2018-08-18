@@ -27,7 +27,7 @@ module tb4;
         $timeformat(-9, 3, " ns");
 
         wb.adr   = '0;
-        wb.dat_i = 'z;
+        wb.dat_m = 'z;
         wb.we    = 1'b0;
         wb.cyc   = 1'b0;
         wb.stb   = 1'b0;

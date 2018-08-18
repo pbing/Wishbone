@@ -6,7 +6,7 @@ task write_single_standard
 
    wb.we    <= 1'b1;
    wb.adr   <= a;
-   wb.dat_i <= d;
+   wb.dat_m <= d;
    wb.cyc   <= 1'b1;
    wb.stb   <= 1'b1;
 
@@ -22,7 +22,7 @@ task write_single_pipelined1
 
    wb.we    <= 1'b1;
    wb.adr   <= a;
-   wb.dat_i <= d;
+   wb.dat_m <= d;
    wb.cyc   <= 1'b1;
    wb.stb   <= 1'b1;
 
