@@ -23,6 +23,20 @@ module tb2;
 
    always #(0.5 * tclk) clk = ~clk;
 
+   always @(posedge clk)
+     begin:monitor
+        logic [15:0] dat_o, dat_i;
+
+        dat_o <= wb.dat_m;
+        dat_i <= wb.dat_s;
+
+        if (wb.cyc && wb.ack && wb.we)
+          $strobe("%t DAT_O = %d", $realtime, dat_o);
+
+        if (wb.cyc && wb.ack && !wb.we)
+          $strobe("%t DAT_I = %d", $realtime, dat_i);
+     end:monitor
+
    initial
      begin:main
         $timeformat(-9, 3, " ns");
