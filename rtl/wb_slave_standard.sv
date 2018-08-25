@@ -6,25 +6,22 @@ module wb_slave_standard(if_wb.slave wb);
    parameter waitcycles = 0;
 
    wire                 valid;
-   logic                ram_cen;
+   wire                 ram_cen;
    wire                 ram_wen;
+   wire  [15:0]         ram_q;
    logic [0:waitcycles] ack;
 
    /* Single port RAM */
    ram64kx16 ram(.clk (wb.clk),
                  .a   (wb.adr),
                  .d   (wb.dat_i),
-                 .q   (wb.dat_o),
+                 .q   (ram_q),
                  .cen (ram_cen),
                  .wen (ram_wen));
 
-   always_comb
-     if (waitcycles == 0)
-       ram_cen = valid & ~wb.ack;
-     else
-       ram_cen = valid & ack[$right(ack) - 1] & ~ack[$right(ack)];
-
-   assign ram_wen = ram_cen & wb.we;
+   assign ram_cen  = valid;
+   assign ram_wen  = ram_cen & wb.we;
+   assign wb.dat_o = !wb.we && wb.ack ? ram_q :'x; // pessimistic simulation
 
    /* Wishbone control */
    assign valid = wb.cyc & wb.stb;

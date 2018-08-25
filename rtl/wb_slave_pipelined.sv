@@ -6,25 +6,22 @@ module wb_slave_pipelined(if_wb.slave wb);
    parameter waitcycles = 0;
 
    wire                 valid;
-   logic                ram_cen;
+   wire                 ram_cen;
    wire                 ram_wen;
+   wire  [15:0]         ram_q;
    logic [1:waitcycles] stall;   // optimized away when no waitcycles
 
    /* Single port RAM */
    ram64kx16 ram(.clk (wb.clk),
                  .a   (wb.adr),
                  .d   (wb.dat_i),
-                 .q   (wb.dat_o),
+                 .q   (ram_q),
                  .cen (ram_cen),
                  .wen (ram_wen));
 
-   always_comb
-     if (waitcycles == 0)
-       ram_cen = valid & ~wb.stall;
-     else
-       ram_cen = valid & ~stall[$right(stall)];
-
-   assign ram_wen = ram_cen & wb.we;
+   assign ram_cen  = valid;
+   assign ram_wen  = ram_cen & wb.we;
+   assign wb.dat_o = !wb.we && wb.ack ? ram_q :'x; // pessimistic simulation
 
    /* Wishbone control */
    assign valid = wb.cyc & wb.stb;
@@ -43,7 +40,7 @@ module wb_slave_pipelined(if_wb.slave wb);
          stall <= '1;
        else
          if (valid)
-           if (waitcycles == 1)
+           if (waitcycles < 2)
              stall <= '0;
            else
              stall <= {1'b0, stall[$left(stall):$right(stall) - 1]};
