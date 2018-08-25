@@ -9,7 +9,6 @@ module wb_slave_pipelined(if_wb.slave wb);
    wire                 ram_cen;
    wire                 ram_wen;
    wire  [15:0]         ram_q;
-   logic [1:waitcycles] stall;   // optimized away when no waitcycles
 
    /* Single port RAM */
    ram64kx16 ram(.clk (wb.clk),
@@ -32,24 +31,48 @@ module wb_slave_pipelined(if_wb.slave wb);
      else
        wb.ack <= valid & ~wb.stall;
 
-   always_ff @(posedge wb.clk)
-     if (wb.rst)
-       stall <= '1;
-     else
-       if (stall == '0)
-         stall <= '1;
-       else
-         if (valid)
-           if (waitcycles < 2)
-             stall <= '0;
-           else
-             stall <= {1'b0, stall[$left(stall):$right(stall) - 1]};
+   generate
+      case (waitcycles)
+        0:
+          begin:w0
+             assign wb.stall = 1'b0;
+          end:w0
 
-   always_comb
-     if (waitcycles == 0)
-       wb.stall = 1'b0;
-     else
-       wb.stall = valid & stall[$right(stall)];
+        1:
+          begin:w1
+             logic stall;
+
+             always_ff @(posedge wb.clk)
+               if (wb.rst)
+                 stall <= 1'b1;
+               else
+                 if (stall == 1'b0)
+                   stall <= 1'b1;
+                 else
+                   if (valid)
+                     stall <= '0;
+
+             assign wb.stall = valid & stall;
+          end:w1
+
+        default
+          begin:wn
+             logic [1:waitcycles] stall;
+
+             always_ff @(posedge wb.clk)
+               if (wb.rst)
+                 stall <= '1;
+               else
+                 if (stall == '0)
+                   stall <= '1;
+                 else
+                   if (valid)
+                     stall <= {1'b0, stall[$left(stall):$right(stall) - 1]};
+
+             assign wb.stall = valid & stall[$right(stall)];
+          end:wn
+      endcase
+   endgenerate
 endmodule
 
 `resetall
