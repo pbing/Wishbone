@@ -2,6 +2,7 @@
 *.do
 *.mpf
 *.mti
+*.vstf
 *.wlf
 work/
 
@@ -16,3 +17,4 @@ simv
 simv.daidir/
 ucli.key
 vcs.args
+
