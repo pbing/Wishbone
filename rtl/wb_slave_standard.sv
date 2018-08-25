@@ -21,7 +21,7 @@ module wb_slave_standard(if_wb.slave wb);
 
    assign ram_cen  = valid;
    assign ram_wen  = ram_cen & wb.we;
-   assign wb.dat_o = !wb.we && wb.ack ? ram_q :'x; // pessimistic simulation
+   assign wb.dat_o = wb.cyc && wb.ack && !wb.we ? ram_q :'x; // pessimistic simulation
 
    /* Wishbone control */
    assign valid = wb.cyc & wb.stb;
