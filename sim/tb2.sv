@@ -21,6 +21,10 @@ module tb2;
 
    wb_slave_pipelined #(waitcycles) dut(.*);
 
+`ifdef ASSERT_ON
+   wb_checker wb_checker(wb);
+`endif
+
    always #(0.5 * tclk) clk = ~clk;
 
    always @(posedge clk)

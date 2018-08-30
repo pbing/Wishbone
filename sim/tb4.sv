@@ -20,6 +20,11 @@ module tb4;
 
    wb_slave_pipelined_wrapper dut(.*);
 
+`ifdef ASSERT_ON
+            wb_checker wb_checker(wb);
+   bind dut wb_checker wb2_checker(wb2);
+`endif
+
    always #(0.5 * tclk) clk = ~clk;
 
    always @(posedge clk)

@@ -21,6 +21,11 @@ module tb3;
 
    wb_slave_standard_wrapper #(waitcycles) dut(.*);
 
+`ifdef ASSERT_ON
+            wb_checker wb_checker(wb);
+   bind dut wb_checker wb2_checker(wb2);
+`endif
+
    always #(0.5 * tclk) clk = ~clk;
 
    always @(posedge clk)
