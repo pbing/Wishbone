@@ -4,7 +4,8 @@
 
 module ram64kx16
   #(parameter adr_width = 16,
-    parameter dat_width = 16)
+    parameter dat_width = 16,
+    parameter mem_size  = 2 ** adr_width)
    (input  wire                      clk,
     input  wire  [adr_width - 1 : 0] a,
     input  wire  [dat_width - 1 : 0] d,
@@ -12,7 +13,7 @@ module ram64kx16
     input  wire                      cen,
     input  wire                      wen);
 
-   logic [dat_width - 1 : 0] mem[2 ** adr_width];
+   logic [dat_width - 1 : 0] mem[mem_size];
 
    always_ff @(posedge clk)
      if (cen && wen)
